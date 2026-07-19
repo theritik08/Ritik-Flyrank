@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Search CTR Opportunity Scoring — Research Paper</title>
+<style>
+  :root {
+    --bg: #FAFAF8;
+    --ink: #1A1D1F;
+    --ink-soft: #52585E;
+    --line: #DDDCD6;
+    --accent: #2C5F4F;
+    --accent-soft: #E8EFEC;
+    --warn: #9A5B2E;
+    --mono: 'IBM Plex Mono', 'SF Mono', Menlo, monospace;
+    --serif: 'Source Serif 4', 'Georgia', serif;
+    --sans: 'Inter', -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  header.hero {
+    border-bottom: 1px solid var(--line);
+    padding: 80px 0 48px;
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+  h1 {
+    font-family: var(--serif);
+    font-size: 44px;
+    line-height: 1.12;
+    font-weight: 600;
+    margin: 0 0 20px;
+    letter-spacing: -0.01em;
+  }
+  .subtitle {
+    font-size: 18px;
+    color: var(--ink-soft);
+    max-width: 600px;
+    margin: 0 0 28px;
+  }
+  .meta-row {
+    display: flex;
+    gap: 28px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-soft);
+    flex-wrap: wrap;
+  }
+  .meta-row span strong { color: var(--ink); }
+
+  section { padding: 56px 0; border-bottom: 1px solid var(--line); }
+  section:last-of-type { border-bottom: none; }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 600;
+    margin: 0 0 8px;
+  }
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 10px;
+  }
+  h3 {
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 700;
+    margin: 28px 0 10px;
+  }
+  p { color: var(--ink-soft); margin: 0 0 16px; font-size: 15.5px; }
+  a { color: var(--accent); }
+  ul, ol { color: var(--ink-soft); font-size: 15.5px; padding-left: 20px; }
+  li { margin-bottom: 8px; }
+
+  .abstract-box {
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    padding: 24px 28px;
+    font-size: 15.5px;
+    color: var(--ink);
+    margin-top: 16px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    margin: 20px 0;
+  }
+  th, td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  th {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    font-weight: 500;
+  }
+  td.num, th.num { font-family: var(--mono); text-align: right; }
+
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    margin: 24px 0;
+  }
+  .metric-cell {
+    background: var(--bg);
+    padding: 22px 18px;
+  }
+  .metric-value {
+    font-family: var(--serif);
+    font-size: 30px;
+    font-weight: 600;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .metric-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-top: 8px;
+  }
+
+  .chart-frame {
+    border: 1px solid var(--line);
+    padding: 20px;
+    background: white;
+    margin: 20px 0;
+  }
+  .chart-frame img { width: 100%; display: block; }
+  .chart-caption {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin-top: 10px;
+  }
+
+  .finding {
+    display: flex;
+    gap: 14px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .finding:last-child { border-bottom: none; }
+  .finding-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 3px 8px;
+    height: fit-content;
+    white-space: nowrap;
+    border-radius: 2px;
+  }
+  .tag-positive { background: var(--accent-soft); color: var(--accent); }
+  .tag-neutral { background: #F0EFE9; color: var(--ink-soft); }
+  .tag-caution { background: #F5E9DE; color: var(--warn); }
+
+  .limitation-list li { margin-bottom: 12px; }
+
+  code {
+    font-family: var(--mono);
+    background: #F0EFE9;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 13.5px;
+  }
+
+  footer {
+    padding: 48px 0 80px;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  footer a { color: var(--accent); }
+
+  @media (max-width: 640px) {
+    h1 { font-size: 32px; }
+    .metric-grid { grid-template-columns: 1fr; }
+    header.hero { padding: 48px 0 32px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">FlyRank ML Internship · Search Intelligence Capstone</div>
+    <h1>Search CTR Opportunity Scoring</h1>
+    <p class="subtitle">Finding pages that rank well but under-capture clicks — and turning that gap into a ranked, evidence-backed action list.</p>
+    <div class="meta-row">
+      <span>Lane: <strong>CTR / Engagement Opportunity Scoring</strong></span>
+      <span>Dataset: <strong>23,521 pages</strong> (filtered)</span>
+      <span>Split: <strong>Grouped by client, 80/20</strong></span>
+    </div>
+  </header>
+
+  <section id="abstract">
+    <span class="section-num">01 — Abstract</span>
+    <h2>Five sentences, start to finish</h2>
+    <div class="abstract-box">
+      Pages that rank well in search don't always capture the clicks their position predicts — this gap represents recoverable value hidden in existing content. This project builds a position-aware baseline for expected click-through rate (CTR) across 23,521 anonymized pages, then tests whether a supervised model can improve on that baseline. A regression approach showed a negligible 0.6% improvement over the position-tier baseline, indicating that ranking position alone explains nearly all predictable CTR variance. Reframing the same problem as binary opportunity classification (top 20% underperformers) performed substantially better, reaching a ROC-AUC of 0.84 and correctly identifying 87% of true opportunity pages. The result is a ranked, reason-coded list of pages a content team can act on first, without needing perfect CTR prediction to be useful.
+    </div>
+  </section>
+
+  <section id="intro">
+    <span class="section-num">02 — Introduction</span>
+    <h2>The decision this supports</h2>
+    <p>Search visibility (impressions, ranking position) and search performance (clicks) don't always move together. A page ranking on page one with an unusually low CTR represents wasted opportunity — the hard part, ranking, is already solved, but the click isn't converting. Manually auditing thousands of pages for this pattern doesn't scale.</p>
+    <p>This project supports one concrete decision: <strong>which pages should a content team review first, and why</strong> — replacing manual spreadsheet triage with a ranked, explainable shortlist.</p>
+  </section>
+
+  <section id="data">
+    <span class="section-num">03 — Data</span>
+    <h2>What went in, what was left out</h2>
+    <p>Source: the FlyRank ML Internship anonymized search dataset — 30,000 pages, 44 columns, covering search performance, content characteristics, and 90-day traffic behavior. No client names, domains, URLs, or credentials appear anywhere in this analysis.</p>
+    <h3>Filtering</h3>
+    <p>Pages with fewer than 50 impressions over 90 days were excluded — <strong>6,479 rows (21.6%)</strong>. Below this threshold, CTR values were statistically unreliable: a page with 1 impression and 1 click registers a 100% CTR, which is noise, not signal. After filtering, the maximum CTR dropped from 100% to a plausible 12%, and the dataset retained 23,521 pages.</p>
+    <h3>Missing data</h3>
+    <p>Columns under 5% missingness were median or mode imputed directly. <code>word_count</code> and <code>char_count</code> (~30% missing) were imputed with an accompanying <code>_was_missing</code> flag — this later revealed that pages with missing word counts had 38% lower average CTR, a real pattern worth preserving rather than erasing. <code>provider_used</code> (72% missing) was dropped entirely.</p>
+  </section>
+
+  <section id="methodology">
+    <span class="section-num">04 — Methodology</span>
+    <h2>Baseline, features, and how validation was protected</h2>
+    <h3>Baseline</h3>
+    <p>Expected CTR is computed as the mean CTR within each position tier (<code>top_3</code>, <code>page_1</code>, <code>striking</code>, <code>page_3_5</code>, <code>deep</code>). The gap between expected and actual CTR is the opportunity signal: a positive gap means a page is underperforming its position.</p>
+    <h3>Two framings tested</h3>
+    <ol>
+      <li><strong>Regression</strong> — predict raw CTR from content, traffic, and metadata features.</li>
+      <li><strong>Classification</strong> — predict whether a page falls in the top 20% of opportunity gap, a binary label, using <code>class_weight="balanced"</code> to handle the resulting imbalance (5,124 opportunity vs. 18,397 non-opportunity pages).</li>
+    </ol>
+    <h3>Leakage prevention</h3>
+    <p><code>clicks_90d</code>, <code>pageviews_90d</code>, <code>sessions_90d</code>, and <code>users_90d</code> were explicitly excluded from features — each is directly derived from or definitionally tied to CTR, and including them would leak the target into the inputs.</p>
+    <h3>Validation design</h3>
+    <p>A grouped train/test split by <code>client_id</code> (80/20) ensured no client's pages appeared in both sets — verified post-split with zero client overlap. A random split was avoided because pages from the same client can share systematic patterns that would otherwise leak across train and test.</p>
+  </section>
+
+  <section id="results">
+    <span class="section-num">05 — Results</span>
+    <h2>Model vs. baseline, on the same split</h2>
+
+    <h3>Regression</h3>
+    <div class="metric-grid">
+      <div class="metric-cell">
+        <div class="metric-value">0.2806</div>
+        <div class="metric-label">Baseline MAE</div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-value">0.2788</div>
+        <div class="metric-label">Random Forest MAE</div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-value">+0.6%</div>
+        <div class="metric-label">Improvement</div>
+      </div>
+    </div>
+    <p>XGBoost was also tested and underperformed the position-only baseline (MAE 0.2821, −0.5%) — additional model complexity did not help. This is a meaningful finding: position-tier alone accounts for nearly all predictable CTR variance available in this dataset.</p>
+
+    <h3>Classification — opportunity detection</h3>
+    <div class="metric-grid">
+      <div class="metric-cell">
+        <div class="metric-value">0.839</div>
+        <div class="metric-label">ROC-AUC (XGBoost)</div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-value">87%</div>
+        <div class="metric-label">Recall on opportunity class</div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-value">46%</div>
+        <div class="metric-label">Precision on opportunity class</div>
+      </div>
+    </div>
+    <p>Threshold sensitivity analysis confirmed the top-20% opportunity threshold as near-optimal — AUC plateaued between the top 15–20% cutoffs, with no further gain from tightening it. High recall, moderate precision is the right trade-off for a triage tool: missing a real opportunity is costlier than a human reviewer spending a few extra minutes on a false positive.</p>
+
+    <div class="chart-frame">
+      <img src="results_charts.png" alt="Left: bar chart comparing baseline and model MAE, nearly identical. Right: ROC curve showing the classification model well above the random-guess diagonal, AUC 0.84.">
+      <div class="chart-caption">Fig. 1 — Left: regression baseline vs. model (MAE, lower is better). Right: classification ROC curve vs. random guessing.</div>
+    </div>
+
+    <h3>What drives the classifier</h3>
+    <p>Position tier and 90-day impressions dominate feature importance (45% combined), followed by engagement rate and scroll rate. Content length — word and character count — contributed minimally (under 2% each): raw content volume does not predict CTR opportunity in this dataset.</p>
+
+    <h3>A bug we caught</h3>
+    <p>An initial pass flagged 432 already-high-CTR pages (CTR ≥ 0.5) as "opportunities," caused by an inflated position-tier expectation for a subset of pages. A post-hoc CTR sanity filter removed these before the list was finalized.</p>
+  </section>
+
+  <section id="limitations">
+    <span class="section-num">06 — Limitations &amp; Honest Framing</span>
+    <h2>What this analysis can and can't claim</h2>
+    <ul class="limitation-list">
+      <li><strong>Directional, not causal.</strong> This dataset cannot explain <em>why</em> CTR is low on a given page — only that a measurable, position-adjusted gap exists.</li>
+      <li><strong>Regression added little value.</strong> Random Forest improved on baseline by 0.6%; XGBoost performed worse than baseline. Position dominates.</li>
+      <li><strong>Precision trade-off.</strong> The classifier's 46% precision means over half of flagged pages will turn out fine on review — by design, favoring recall over precision.</li>
+      <li><strong>Engagement and scroll-rate features are outcome-adjacent</strong> — measured alongside performance, not necessarily a cause of it. Removing them (testing for leakage) degraded the model below baseline, confirming they carry legitimate signal rather than target leakage.</li>
+      <li><strong>No access to Google's ranking algorithm</strong>, query-level intent, or causal refresh impact — all recommendations are decision-support, not proof.</li>
+    </ul>
+  </section>
+
+  <section id="recommendations">
+    <span class="section-num">07 — Ranked Recommendations</span>
+    <h2>The action playbook</h2>
+    <p>Pages are ranked by opportunity score (classifier probability), filtered to exclude already-high-CTR false positives, and tagged with a reason code:</p>
+    <table>
+      <thead>
+        <tr><th>Priority</th><th>Reason code</th><th>Recommended action</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>High</td><td>Good position, CTR near zero</td><td>Rewrite title / meta description</td></tr>
+        <tr><td>Medium</td><td>High visibility, low engagement</td><td>Content quality / relevance review</td></tr>
+        <tr><td>Medium</td><td>Weak position</td><td>SEO / ranking work before CTR optimization</td></tr>
+        <tr><td>Monitor</td><td>Within expected range</td><td>No action — periodic re-check only</td></tr>
+      </tbody>
+    </table>
+    <p>The full ranked list of 20+ pages, with individual scores and reason codes, is in the capstone notebook linked below.</p>
+  </section>
+
+  <section id="reproducibility">
+    <span class="section-num">08 — Reproducibility</span>
+    <h2>Where the work lives</h2>
+    <ul>
+      <li>Capstone notebook: <a href="../work/capstone_notebook.ipynb">/work/capstone_notebook.ipynb</a></li>
+      <li>All assignment notebooks: <a href="../work">/work</a></li>
+      <li>Random seed fixed at 42 throughout for reproducibility</li>
+      <li>Environment: Python, pandas, scikit-learn, XGBoost, DuckDB, matplotlib</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p>Built on the <a href="https://flyrank.ai" target="_blank">FlyRank ML Internship dataset</a>.</p>
+  </footer>
+</div>
+
+</body>
+</html>
